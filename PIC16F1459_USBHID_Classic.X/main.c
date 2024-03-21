@@ -42,13 +42,17 @@
 */
 
 #include "mcc_generated_files/mcc.h"
+#include "inc/app_device_custom_hid.h"
+#include "usb.h"
+#include "usb_device_hid.h"
 
+#include "app_device_custom_hid.h"
 /*
                          Main application
  */
 void TIMER_1SEC (void)
 {
-    LED0_Toggle();
+    //LED0_Toggle();
 }
 #define MCP4725_I2CADDR_DEFAULT (0x60) ///< Default i2c address
 #define MCP4725_CMD_WRITEDAC (0x40)    ///< Writes data to the DAC
@@ -80,6 +84,10 @@ void main(void)
     SYSTEM_Initialize();
     TMR1_SetInterruptHandler(TIMER_1SEC);
     TMR1_StartTimer();
+    USB_Initialize(SYSTEM_STATE_USB_START);
+
+    USBDeviceInit();
+    USBDeviceAttach();
     // When using interrupts, you need to set the Global and Peripheral Interrupt Enable bits
     // Use the following macros to:
 
@@ -98,6 +106,7 @@ void main(void)
     while (1)
     {
         // Add your application code
+        APP_DeviceCustomHIDTasks();
     }
 }
 /**

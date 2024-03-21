@@ -21,6 +21,21 @@
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
         <itemPath>mcc_generated_files/i2c_master.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1" displayName="usb" projectFiles="true">
+        <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/inc/usb.h</itemPath>
+        <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/inc/usb_ch9.h</itemPath>
+        <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/inc/usb_common.h</itemPath>
+        <itemPath>inc/usb_config.h</itemPath>
+        <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/inc/usb_device.h</itemPath>
+        <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/inc/usb_device_hid.h</itemPath>
+        <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/inc/usb_hal.h</itemPath>
+        <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/inc/usb_hal_pic16f1.h</itemPath>
+        <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/src/usb_device_local.h</itemPath>
+        <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/src/usb_hal_local.h</itemPath>
+      </logicalFolder>
+      <itemPath>inc/app_device_custom_hid.h</itemPath>
+      <itemPath>inc/fixed_address_memory.h</itemPath>
+      <itemPath>inc/io_mapping.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -56,8 +71,18 @@
         <itemPath>mcc_generated_files/i2c_master.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
+      <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/src/usb_device.c</itemPath>
+      <itemPath>../ExtLib/mla/v2018_11_26/framework/usb/src/usb_device_hid.c</itemPath>
+      <itemPath>app_device_custom_hid.c</itemPath>
+      <itemPath>usb_descriptors.c</itemPath>
+      <itemPath>usb_events.c</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>../ExtLib/mla/v2018_11_26/framework/usb/inc</Elem>
+    <Elem>../ExtLib/mla/v2018_11_26/framework/usb/src</Elem>
+    <Elem>.</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">
@@ -107,9 +132,10 @@
         <property key="call-prologues" value="false"/>
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
-        <property key="define-macros" value=""/>
+        <property key="define-macros" value="USE_INTERNAL_OSC"/>
         <property key="disable-optimizations" value="true"/>
-        <property key="extra-include-directories" value=""/>
+        <property key="extra-include-directories"
+                  value="inc;..\ExtLib\mla\v2018_11_26\framework\usb\inc;..\ExtLib\mla\v2018_11_26\framework\usb\src"/>
         <property key="favor-optimization-for" value="-speed,+space"/>
         <property key="garbage-collect-data" value="true"/>
         <property key="garbage-collect-functions" value="true"/>

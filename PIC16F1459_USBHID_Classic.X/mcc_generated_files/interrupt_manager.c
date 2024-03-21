@@ -48,7 +48,7 @@
 
 #include "interrupt_manager.h"
 #include "mcc.h"
-
+#include "usb.h"
 void __interrupt() INTERRUPT_InterruptManager (void)
 {
     // interrupt handler
@@ -61,6 +61,7 @@ void __interrupt() INTERRUPT_InterruptManager (void)
         else
         {
             //Unhandled Interrupt
+            USBDeviceTasks();
         }
     }      
     else
