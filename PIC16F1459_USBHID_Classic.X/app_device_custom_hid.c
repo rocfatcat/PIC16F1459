@@ -48,17 +48,43 @@ please contact mla_licensing@microchip.com
 
 volatile USB_HANDLE USBOutHandle;    
 volatile USB_HANDLE USBInHandle;
+volatile static uint32_t dac_value =0;
 
 /** DEFINITIONS ****************************************************/
 typedef enum
 {
     COMMAND_TOGGLE_LED = 0x80,
     COMMAND_GET_BUTTON_STATUS = 0x81,
-    COMMAND_READ_POTENTIOMETER = 0x37
+    COMMAND_WRITE_DAC_POTENTIOMETER = 0x82,
+    COMMAND_READ_POTENTIOMETER = 0x37,
+    COMMAND_READ_DAC_POTENTIOMETER = 0x38,
 } CUSTOM_HID_DEMO_COMMANDS;
 
 /** FUNCTIONS ******************************************************/
+#define MCP4725_I2CADDR_DEFAULT (0x60) ///< Default i2c address
+#define MCP4725_CMD_WRITEDAC (0x40)    ///< Writes data to the DAC
+#define MCP4725_CMD_WRITEDACEEPROM (0x60) 
+void MCP4725_Init(void)
+{
+    uint8_t i=0;
+    uint8_t sendData[17] = {0x00,0x00,0xA1,0xA2,0xA3,0xA4,0xA5,0xA6,0xA7,0xA8,0xA9,0xAA,0xAB,0xAC,0xAD,0xAE,0xAF};
+    uint8_t receiveData[15];
+    i2c_writeNBytes(MCP4725_I2CADDR_DEFAULT,sendData,sizeof(sendData)); // Writes sendData[] to EEPROM
+}
+void MCP4725_SetVoltage(uint16_t output, bool writeEEPROM  )
+{
+  uint8_t packet[3];
 
+  if (writeEEPROM) {
+    packet[0] = MCP4725_CMD_WRITEDACEEPROM;
+  } else {
+    packet[0] = MCP4725_CMD_WRITEDAC;
+  }
+  packet[1] = output / 16;        // Upper data bits (D11.D10.D9.D8.D7.D6.D5.D4)
+  packet[2] = (output % 16) << 4; // Lower data bits (D3.D2.D1.D0.x.x.x.x)
+
+  i2c_writeNBytes(MCP4725_I2CADDR_DEFAULT,packet,sizeof(packet));
+}
 /*********************************************************************
 * Function: void APP_DeviceCustomHIDInitialize(void);
 *
@@ -156,7 +182,12 @@ void APP_DeviceCustomHIDTasks()
                     USBInHandle = HIDTxPacket(CUSTOM_DEVICE_HID_EP, (uint8_t*)&ToSendDataBuffer[0],64);
                 }
                 break;
-
+            case COMMAND_WRITE_DAC_POTENTIOMETER:
+                {
+                    dac_value = ReceivedDataBuffer[1] | ReceivedDataBuffer[2] <<8;
+                    MCP4725_SetVoltage(dac_value,false);
+                }
+                break;
             case COMMAND_READ_POTENTIOMETER:	//Read POT command.  Uses ADC to measure an analog voltage on one of the ANxx I/O pins, and returns the result to the host
                 {
                     uint16_t pot;
@@ -181,6 +212,27 @@ void APP_DeviceCustomHIDTasks()
                         USBInHandle = HIDTxPacket(CUSTOM_DEVICE_HID_EP, (uint8_t*)&ToSendDataBuffer[0],64);
                     }
                 }
+                break;
+            case COMMAND_READ_DAC_POTENTIOMETER:	//Read POT command.  Uses ADC to measure an analog voltage on one of the ANxx I/O pins, and returns the result to the host
+                    //Check to make sure the endpoint/buffer is free before we modify the contents
+                    if(!HIDTxHandleBusy(USBInHandle))
+                    {
+                        //Use ADC to read the I/O pin voltage.  See the relevant HardwareProfile - xxxxx.h file for the I/O pin that it will measure.
+                        //Some demo boards, like the PIC18F87J50 FS USB Plug-In Module board, do not have a potentiometer (when used stand alone).
+                        //This function call will still measure the analog voltage on the I/O pin however.  To make the demo more interesting, it
+                        //is suggested that an external adjustable analog voltage should be applied to this pin.
+
+//                        pot = ADC_Read10bit(ADC_CHANNEL_POTENTIOMETER);
+
+                        ToSendDataBuffer[0] = 0x38;  	//Echo back to the host the command we are fulfilling in the first uint8_t.  In this case, the Read POT (analog voltage) command.
+//                        ToSendDataBuffer[1] = (uint8_t)pot; //LSB
+//                        ToSendDataBuffer[2] = pot >> 8;     //MSB
+                        ToSendDataBuffer[1] = (uint8_t)dac_value;
+                        ToSendDataBuffer[2] = dac_value >> 8;
+
+                        //Prepare the USB module to send the data packet to the host
+                        USBInHandle = HIDTxPacket(CUSTOM_DEVICE_HID_EP, (uint8_t*)&ToSendDataBuffer[0],64);
+                    }
                 break;
         }
         //Re-arm the OUT endpoint, so we can receive the next OUT data packet 
@@ -218,3 +270,4 @@ void USB_Initialize( SYSTEM_STATE state )
             break;
     }
 }
+

@@ -54,30 +54,7 @@ void TIMER_1SEC (void)
 {
     //LED0_Toggle();
 }
-#define MCP4725_I2CADDR_DEFAULT (0x60) ///< Default i2c address
-#define MCP4725_CMD_WRITEDAC (0x40)    ///< Writes data to the DAC
-#define MCP4725_CMD_WRITEDACEEPROM (0x60) 
-void MCP4725_Init(void)
-{
-    uint8_t i=0;
-    uint8_t sendData[17] = {0x00,0x00,0xA1,0xA2,0xA3,0xA4,0xA5,0xA6,0xA7,0xA8,0xA9,0xAA,0xAB,0xAC,0xAD,0xAE,0xAF};
-    uint8_t receiveData[15];
-    i2c_writeNBytes(MCP4725_I2CADDR_DEFAULT,sendData,sizeof(sendData)); // Writes sendData[] to EEPROM
-}
-void MCP4725_SetVoltage(uint16_t output, bool writeEEPROM  )
-{
-  uint8_t packet[3];
 
-  if (writeEEPROM) {
-    packet[0] = MCP4725_CMD_WRITEDACEEPROM;
-  } else {
-    packet[0] = MCP4725_CMD_WRITEDAC;
-  }
-  packet[1] = output / 16;        // Upper data bits (D11.D10.D9.D8.D7.D6.D5.D4)
-  packet[2] = (output % 16) << 4; // Lower data bits (D3.D2.D1.D0.x.x.x.x)
-
-  i2c_writeNBytes(MCP4725_I2CADDR_DEFAULT,packet,sizeof(packet));
-}
 void main(void)
 {
     // initialize the device
@@ -102,7 +79,7 @@ void main(void)
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-    MCP4725_SetVoltage(2000,false);
+   
     while (1)
     {
         // Add your application code
